@@ -560,26 +560,26 @@ def delete_all_employees(db: Session = Depends(get_db), current_user: User = Dep
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
         
     @app.delete("/full-clear")
-def full_clear_database(db: Session = Depends(get_db), current_user: User = Depends(require_role(["admin"]))):
+    def full_clear_database(db: Session = Depends(get_db), current_user: User = Depends(require_role(["admin"]))):
     """Полностью очищает базу данных: удаляет всех сотрудников, их историю, логи и учётные записи (только admin)"""
     try:
         # Удаляем историю и логи действий
         db.query(History).delete()
         db.query(ActionLog).delete()
-        
+
         # Отвязываем пользователей от сотрудников (на всякий случай)
         db.query(User).update({User.employee_id: None}, synchronize_session=False)
-        
+
         # Удаляем всех сотрудников
         db.query(Employee).delete()
-        
+
         # Удаляем всех пользователей с ролью employee (их учётные записи)
         db.query(User).filter(User.role == "employee").delete()
-        
+
         # Удаляем файл с паролями, если существует
         if os.path.exists(PASSWORDS_FILE):
             os.remove(PASSWORDS_FILE)
-        
+
         db.commit()
         return {"message": "База данных полностью очищена (сотрудники и учётные записи удалены)"}
     except Exception as e:
