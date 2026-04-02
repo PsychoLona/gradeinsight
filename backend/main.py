@@ -141,6 +141,30 @@ if os.path.exists(frontend_path):
     app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
 else:
     print(f"Frontend folder not found at {frontend_path}")
+
+from fastapi.responses import FileResponse
+# Определяем путь к папке frontend (относительно расположения main.py)
+frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend"))
+
+# Раздаём статику (CSS, JS) – не обязательно, но пригодится
+if os.path.exists(frontend_dir):
+    app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+
+# Главная страница – отдаём standalone.html
+@app.get("/")
+async def serve_frontend():
+    index_path = os.path.join(frontend_dir, "standalone.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "GradeInsight API v2.0"}
+
+# Чтобы можно было напрямую открыть employee.html
+@app.get("/employee.html")
+async def serve_employee():
+    emp_path = os.path.join(frontend_dir, "employee.html")
+    if os.path.exists(emp_path):
+        return FileResponse(emp_path)
+    raise HTTPException(status_code=404)
 # ==================== Аутентификация и авторизация ====================
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
