@@ -600,6 +600,7 @@
                     case 4: aVal = a.grade_result.total_score; bVal = b.grade_result.total_score; break;
                     case 5: aVal = a.metrics.tasks_completed; bVal = b.metrics.tasks_completed; break;
                     case 6: aVal = a.metrics.deadlines_met; bVal = b.metrics.deadlines_met; break;
+                    case 7: aVal = a.recommendation || ''; bVal = b.recommendation || ''; break;
                     default: return 0;
                 }
                 if (typeof aVal === 'number') {
@@ -612,47 +613,50 @@
             renderEmployeesTable(sorted);
         }
 
-        function renderEmployeesTable(employees) {
-            if (employees.length === 0) {
-                document.getElementById('employeesTableContainer').innerHTML = '<p>Нет данных. Загрузите файл с сотрудниками.</p>';
-                return;
-            }
+function renderEmployeesTable(employees) {
+    if (employees.length === 0) {
+        document.getElementById('employeesTableContainer').innerHTML = '<p>Нет данных. Загрузите файл с сотрудниками.</p>';
+        return;
+    }
 
-            let html = '<div class="employees-table-wrapper"><table id="employeesTable"><thead><tr>';
-            const headers = ['ID', 'Имя', 'Должность', 'Грейд', 'Балл', 'Задачи', 'Дедлайны', 'Действия'];
-            headers.forEach((header, idx) => {
-                let sortIndicator = '';
-                if (currentSortColumn === idx) {
-                    sortIndicator = currentSortDirection === 'asc' ? ' ▲' : ' ▼';
-                }
-                html += `<th onclick="sortEmployees(${idx})">${header}<i>${sortIndicator}</i></th>`;
-            });
-            html += '</tr></thead><tbody>';
-
-            for (const emp of employees) {
-                const grade = emp.grade_result.grade;
-                const gradeClass = `grade-${grade.toLowerCase()}`;
-                html += `
-                    <tr>
-                        <td>${emp.id}</td>
-                        <td>${emp.name}</td>
-                        <td>${emp.position}</td>
-                        <td class="${gradeClass}">${grade}</td>
-                        <td>${emp.grade_result.total_score}</td>
-                        <td>${emp.metrics.tasks_completed}</td>
-                        <td>${emp.metrics.deadlines_met}%</td>
-                        <td class="recommendation-${recClass}">${emp.recommendation}</td>
-                        <td>
-                            <button onclick="viewEmployee(${emp.id})">👤 Профиль</button>
-                            <button onclick="viewGapAnalysis(${emp.id}, '${emp.name}')">📊 GAP-анализ</button>
-                        </td>
-                    </tr>
-                `;
-            }
-            html += '</tbody></table></div>';
-            document.getElementById('employeesTableContainer').innerHTML = html;
+    let html = '<div class="employees-table-wrapper"><table id="employeesTable"><thead><tr>';
+    const headers = ['ID', 'Имя', 'Должность', 'Грейд', 'Балл', 'Задачи', 'Дедлайны', 'Рекомендация', 'Действия'];
+    headers.forEach((header, idx) => {
+        let sortIndicator = '';
+        if (currentSortColumn === idx) {
+            sortIndicator = currentSortDirection === 'asc' ? ' ▲' : ' ▼';
         }
+        html += `<th onclick="sortEmployees(${idx})">${header}<i>${sortIndicator}</i></th>`;
+    });
+    html += '</tr></thead><tbody>';
 
+    for (const emp of employees) {
+        const grade = emp.grade_result.grade;
+        const gradeClass = `grade-${grade.toLowerCase()}`;
+        const recommendation = emp.recommendation || '';
+        let recClass = '';
+        if (recommendation === 'Повысить') recClass = 'up';
+        else if (recommendation === 'Понизить') recClass = 'down';
+        else recClass = 'keep';
+
+        // Экранируем имя для передачи в функцию
+        const escapedName = emp.name.replace(/'/g, "\\'");
+
+        html += '<tr>';
+        html += '<td>' + emp.id + '</td>';
+        html += '<td>' + emp.name + '</td>';
+        html += '<td>' + emp.position + '</td>';
+        html += '<td class="' + gradeClass + '">' + grade + '</td>';
+        html += '<td>' + emp.grade_result.total_score + '</td>';
+        html += '<td>' + emp.metrics.tasks_completed + '</td>';
+        html += '<td>' + emp.metrics.deadlines_met + '%</td>';
+        html += '<td class="recommendation-' + recClass + '">' + recommendation + '</td>';
+        html += '<td><button onclick="viewEmployee(' + emp.id + ')">👤 Профиль</button> <button onclick="viewGapAnalysis(' + emp.id + ', \'' + escapedName + '\')">📊 GAP-анализ</button></td>';
+        html += '</tr>';
+    }
+    html += '</tbody></table></div>';
+    document.getElementById('employeesTableContainer').innerHTML = html;
+}
         async function loadEmployees() {
             try {
                 const department = document.getElementById('departmentFilter').value;
