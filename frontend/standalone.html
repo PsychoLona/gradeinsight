@@ -123,6 +123,12 @@
             width: 100%;
             margin-top: 10px;
         }
+        .filter-area {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -148,6 +154,13 @@
                 <button id="exportExcelBtn" class="btn-success">📎 Скачать отчёт (Excel)</button>
                 <button id="exportAccountsBtn" class="btn-success" style="display: none;">📋 Выгрузить учётные записи</button>
                 <span id="uploadStatus" class="status"></span>
+            </div>
+            <div class="filter-area">
+                <label>Отдел: </label>
+                <select id="departmentFilter">
+                    <option value="">Все отделы</option>
+                </select>
+                <button id="applyFilterBtn">Применить</button>
             </div>
             <div id="uploadResult" style="display: none; margin-top: 10px; padding: 10px; background: #e8f4fd; border-radius: 8px;">
                 <h4>📋 Созданные учётные записи</h4>
@@ -231,7 +244,10 @@
 
         async function loadDashboard() {
             try {
-                const response = await fetchWithAuth(`${API_URL}/dashboard`);
+                const department = document.getElementById('departmentFilter').value;
+                let url = `${API_URL}/dashboard`;
+                if (department) url += `?department=${encodeURIComponent(department)}`;
+                const response = await fetchWithAuth(url);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const dashboard = await response.json();
                 
@@ -277,7 +293,10 @@
         
         async function loadEmployees() {
             try {
-                const response = await fetchWithAuth(`${API_URL}/employees`);
+                const department = document.getElementById('departmentFilter').value;
+                let url = `${API_URL}/employees`;
+                if (department) url += `?department=${encodeURIComponent(department)}`;
+                const response = await fetchWithAuth(url);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const employees = await response.json();
                 
@@ -286,16 +305,16 @@
                     return;
                 }
                 
-                let html = '<table><thead><tr>';
+                let html = '点table<thead>点';
                 html += '<th>ID</th><th>Имя</th><th>Должность</th><th>Грейд</th><th>Балл</th>';
                 html += '<th>Задачи</th><th>Дедлайны</th><th>Действия</th>';
-                html += '</tr></thead><tbody>';
+                html += '</thead><tbody>';
                 
                 for (const emp of employees) {
                     const grade = emp.grade_result.grade;
                     const gradeClass = `grade-${grade.toLowerCase()}`;
                     
-                    html += '<tr>';
+                    html += '点tr点';
                     html += `<td>${emp.id}</td>`;
                     html += `<td>${emp.name}</td>`;
                     html += `<td>${emp.position}</td>`;
@@ -307,9 +326,9 @@
                         <button onclick="viewEmployee(${emp.id})">👤 Профиль</button>
                         <button onclick="viewGapAnalysis(${emp.id}, '${emp.name}')">📊 GAP-анализ</button>
                     </td>`;
-                    html += '</tr>';
+                    html += '点/tr点';
                 }
-                html += '</tbody></table>';
+                html += '</tbody>点/table>';
                 document.getElementById('employeesTableContainer').innerHTML = html;
             } catch (error) {
                 console.error('Ошибка загрузки сотрудников:', error);
@@ -394,7 +413,6 @@
                     statusSpan.innerHTML = `✅ ${result.message}`;
                     statusSpan.style.color = 'green';
                     
-                    // Показываем блок с учётными записями
                     if (result.users && result.users.length > 0) {
                         const accountsDiv = document.getElementById('accountsList');
                         let html = '';
@@ -407,12 +425,12 @@
                         }
                         accountsDiv.innerHTML = html;
                         document.getElementById('uploadResult').style.display = 'block';
-                        // Показываем кнопку выгрузки, если есть новые учётные записи
                         checkAccounts();
                     } else {
                         document.getElementById('uploadResult').style.display = 'none';
                     }
                     
+                    await loadDepartments(); // обновляем список отделов
                     loadDashboard();
                     loadEmployees();
                 } else {
@@ -438,13 +456,32 @@
                 });
                 const result = await response.json();
                 statusSpan.innerHTML = `✅ ${result.message}`;
-                // Скрываем блок с учётными записями и кнопку выгрузки
                 document.getElementById('uploadResult').style.display = 'none';
                 document.getElementById('exportAccountsBtn').style.display = 'none';
+                await loadDepartments();
                 loadDashboard();
                 loadEmployees();
             } catch (error) {
                 statusSpan.innerHTML = `❌ Ошибка: ${error.message}`;
+            }
+        }
+        
+        async function loadDepartments() {
+            try {
+                const response = await fetchWithAuth(`${API_URL}/departments`);
+                const depts = await response.json();
+                const select = document.getElementById('departmentFilter');
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">Все отделы</option>';
+                depts.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    select.appendChild(option);
+                });
+                select.value = currentValue;
+            } catch (error) {
+                console.error('Ошибка загрузки отделов:', error);
             }
         }
         
@@ -458,6 +495,10 @@
             document.getElementById('uploadStatus').innerHTML = '';
         }
         
+        document.getElementById('applyFilterBtn').addEventListener('click', () => {
+            loadDashboard();
+            loadEmployees();
+        });
         document.getElementById('uploadBtn').addEventListener('click', uploadFile);
         document.getElementById('clearDataBtn').addEventListener('click', clearData);
         document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
@@ -507,7 +548,8 @@
             } else {
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('appContent').style.display = 'block';
-                checkAccounts();  // проверяем наличие паролей
+                loadDepartments();
+                checkAccounts();
                 loadDashboard();
                 loadEmployees();
             }
