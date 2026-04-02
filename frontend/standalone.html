@@ -112,26 +112,50 @@
             margin: 0 auto;
         }
 
+        /* Стили таблицы с улучшенным разделением */
+        .employees-table-wrapper {
+            overflow-x: auto;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            font-size: 0.9rem;
         }
 
         th, td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #edf2f7;
+            border-right: 1px solid #edf2f7;
+        }
+
+        th:last-child, td:last-child {
+            border-right: none;
         }
 
         th {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             font-weight: 600;
-            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        th:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46a0);
+        }
+
+        th i {
+            margin-left: 5px;
+            font-style: normal;
+            font-size: 0.8rem;
+            opacity: 0.7;
         }
 
         tr {
@@ -140,6 +164,10 @@
 
         tr:hover {
             background: #f7fafc;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9fafb;
         }
 
         button {
@@ -323,7 +351,7 @@
             <button id="logoutBtn" class="logout-btn">🚪 Выйти</button>
             <h1>📊 GradeInsight</h1>
             <div class="subtitle">Интеллектуальная система поддержки принятия решений при грейдировании персонала</div>
-            
+
             <div class="upload-area">
                 <h3 style="margin:0;">📂 Загрузить данные</h3>
                 <input type="file" id="uploadFile" accept=".csv,.xlsx">
@@ -362,7 +390,7 @@
                 <!-- Таблица сотрудников – занимает всю ширину, внутри фильтр -->
                 <div class="card full-width">
                     <h2>👥 Сотрудники</h2>
-                    <!-- Фильтр теперь внутри карточки -->
+                    <!-- Фильтр внутри карточки -->
                     <div class="filter-area" style="margin-bottom: 20px;">
                         <label>🏢 Отдел: </label>
                         <select id="departmentFilter">
@@ -385,12 +413,16 @@
     </div>
 
     <script>
-        // ==================== JavaScript (без изменений, полная копия из работающей версии) ====================
         const API_URL = '';
         let token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
         const employee_id = localStorage.getItem('employee_id');
         let chart = null;
+
+        // Данные для сортировки
+        let currentEmployeesData = [];
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc';
 
         async function fetchWithAuth(url, options = {}) {
             const headers = {
@@ -488,6 +520,76 @@
             }
         }
 
+        function sortEmployees(columnIndex) {
+            if (currentSortColumn === columnIndex) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = columnIndex;
+                currentSortDirection = 'asc';
+            }
+            const sorted = [...currentEmployeesData];
+            sorted.sort((a, b) => {
+                let aVal, bVal;
+                switch (columnIndex) {
+                    case 0: aVal = a.id; bVal = b.id; break;
+                    case 1: aVal = a.name; bVal = b.name; break;
+                    case 2: aVal = a.position; bVal = b.position; break;
+                    case 3: aVal = a.grade_result.grade; bVal = b.grade_result.grade; break;
+                    case 4: aVal = a.grade_result.total_score; bVal = b.grade_result.total_score; break;
+                    case 5: aVal = a.metrics.tasks_completed; bVal = b.metrics.tasks_completed; break;
+                    case 6: aVal = a.metrics.deadlines_met; bVal = b.metrics.deadlines_met; break;
+                    default: return 0;
+                }
+                if (typeof aVal === 'number') {
+                    return currentSortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+                } else {
+                    const comparison = String(aVal).localeCompare(String(bVal));
+                    return currentSortDirection === 'asc' ? comparison : -comparison;
+                }
+            });
+            renderEmployeesTable(sorted);
+        }
+
+        function renderEmployeesTable(employees) {
+            if (employees.length === 0) {
+                document.getElementById('employeesTableContainer').innerHTML = '<p>Нет данных. Загрузите файл с сотрудниками.</p>';
+                return;
+            }
+
+            let html = '<div class="employees-table-wrapper"><table id="employeesTable"><thead><tr>';
+            const headers = ['ID', 'Имя', 'Должность', 'Грейд', 'Балл', 'Задачи', 'Дедлайны', 'Действия'];
+            headers.forEach((header, idx) => {
+                let sortIndicator = '';
+                if (currentSortColumn === idx) {
+                    sortIndicator = currentSortDirection === 'asc' ? ' ▲' : ' ▼';
+                }
+                html += `<th onclick="sortEmployees(${idx})">${header}<i>${sortIndicator}</i></th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            for (const emp of employees) {
+                const grade = emp.grade_result.grade;
+                const gradeClass = `grade-${grade.toLowerCase()}`;
+                html += `
+                    <tr>
+                        <td>${emp.id}</td>
+                        <td>${emp.name}</td>
+                        <td>${emp.position}</td>
+                        <td class="${gradeClass}">${grade}</td>
+                        <td>${emp.grade_result.total_score}</td>
+                        <td>${emp.metrics.tasks_completed}</td>
+                        <td>${emp.metrics.deadlines_met}%</td>
+                        <td>
+                            <button onclick="viewEmployee(${emp.id})">👤 Профиль</button>
+                            <button onclick="viewGapAnalysis(${emp.id}, '${emp.name}')">📊 GAP-анализ</button>
+                        </td>
+                    </tr>
+                `;
+            }
+            html += '</tbody></table></div>';
+            document.getElementById('employeesTableContainer').innerHTML = html;
+        }
+
         async function loadEmployees() {
             try {
                 const department = document.getElementById('departmentFilter').value;
@@ -496,38 +598,10 @@
                 const response = await fetchWithAuth(url);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const employees = await response.json();
-
-                if (employees.length === 0) {
-                    document.getElementById('employeesTableContainer').innerHTML = '<p>Нет данных. Загрузите файл с сотрудниками.</p>';
-                    return;
-                }
-
-                let html = '<table><thead><tr>';
-                html += '<th>ID</th><th>Имя</th><th>Должность</th><th>Грейд</th><th>Балл</th>';
-                html += '<th>Задачи</th><th>Дедлайны</th><th>Действия</th>';
-                html += '</tr></thead><tbody>';
-
-                for (const emp of employees) {
-                    const grade = emp.grade_result.grade;
-                    const gradeClass = `grade-${grade.toLowerCase()}`;
-                    html += `
-                        <tr>
-                            <td>${emp.id}</td>
-                            <td>${emp.name}</td>
-                            <td>${emp.position}</td>
-                            <td class="${gradeClass}">${grade}</td>
-                            <td>${emp.grade_result.total_score}</td>
-                            <td>${emp.metrics.tasks_completed}</td>
-                            <td>${emp.metrics.deadlines_met}%</td>
-                            <td>
-                                <button onclick="viewEmployee(${emp.id})">👤 Профиль</button>
-                                <button onclick="viewGapAnalysis(${emp.id}, '${emp.name}')">📊 GAP-анализ</button>
-                            </td>
-                        </tr>
-                    `;
-                }
-                html += '</tbody></table>';
-                document.getElementById('employeesTableContainer').innerHTML = html;
+                currentEmployeesData = employees;
+                currentSortColumn = null;
+                currentSortDirection = 'asc';
+                renderEmployeesTable(employees);
             } catch (error) {
                 console.error('Ошибка загрузки сотрудников:', error);
                 document.getElementById('employeesTableContainer').innerHTML = '<p style="color:red;">Ошибка загрузки списка сотрудников</p>';
