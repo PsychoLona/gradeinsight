@@ -851,7 +851,26 @@ def set_role_targets(role_id: int, targets: dict, db: Session = Depends(get_db),
                 db.add(new_target)
     db.commit()
     return {"message": "Целевые значения установлены"}
-
+    
+@app.get("/migrate/add_grade_columns")
+async def add_grade_columns(db: Session = Depends(get_db), current_user: User = Depends(require_role(["admin"]))):
+    try:
+        # Проверяем, существует ли колонка formal_grade
+        from sqlalchemy import inspect, text
+        inspector = inspect(db.get_bind())
+        columns = [col['name'] for col in inspector.get_columns('employees')]
+        
+        if 'formal_grade' not in columns:
+            db.execute(text("ALTER TABLE employees ADD COLUMN formal_grade VARCHAR(50) DEFAULT ''"))
+            db.commit()
+        if 'recommendation' not in columns:
+            db.execute(text("ALTER TABLE employees ADD COLUMN recommendation VARCHAR(50) DEFAULT ''"))
+            db.commit()
+        
+        return {"message": "Columns 'formal_grade' and 'recommendation' added successfully"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
 # ==================== Запуск ====================
 
 if __name__ == "__main__":
