@@ -472,12 +472,10 @@ async def upload_employees(
             if col not in df.columns:
                 raise HTTPException(status_code=400, detail=f"Отсутствует колонка: {col}")
                 
-        # Сначала удаляем связанные записи (историю и логи)
+       
         db.query(History).delete()
         db.query(ActionLog).delete()
-        # Отвязываем пользователей
         db.query(User).update({User.employee_id: None}, synchronize_session=False)
-        # Удаляем сотрудников
         db.query(Employee).delete()
         created_users = []
 
@@ -537,12 +535,29 @@ async def upload_employees(
         
 @app.delete("/employees")
 def delete_all_employees(db: Session = Depends(get_db), current_user: User = Depends(require_role(["admin"]))):
-    count = db.query(Employee).count()
-    db.query(Employee).delete()
-    db.commit()
-    if os.path.exists(PASSWORDS_FILE):
-        os.remove(PASSWORDS_FILE)
-    return {"message": f"Удалено {count} сотрудников"}
+    try:
+        # 1. Удаляем историю и логи действий
+        db.query(History).delete()
+        db.query(ActionLog).delete()
+        
+        # 2. Отвязываем пользователей
+        db.query(User).update({User.employee_id: None}, synchronize_session=False)
+        
+        # 3. Удаляем сотрудников
+        count = db.query(Employee).count()
+        db.query(Employee).delete()
+        
+        # 4. Удаляем файл с паролями, если есть
+        if os.path.exists(PASSWORDS_FILE):
+            os.remove(PASSWORDS_FILE)
+        
+        db.commit()
+        return {"message": f"Удалено {count} сотрудников"}
+    except Exception as e:
+        db.rollback()
+        print("=== ERROR in DELETE /employees ===", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 @app.get("/check-accounts")
 def check_accounts(current_user: User = Depends(require_role(["admin"]))):
