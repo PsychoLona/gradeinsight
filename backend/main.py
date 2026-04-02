@@ -38,6 +38,7 @@ try:
     from jose import JWTError, jwt
     from passlib.context import CryptContext
     from sqlalchemy.orm import Session
+    from fastapi import Request
     print("Libraries imported")
 
     print("Importing database module...")
@@ -148,10 +149,7 @@ print(f"Frontend directory: {frontend_dir}")
 print(f"Frontend exists: {os.path.exists(frontend_dir)}")
 if os.path.exists(frontend_dir):
     print(f"Files in frontend: {os.listdir(frontend_dir)}")
-else:
-    print("ERROR: Frontend folder not found!")
-
-    # Опционально: раздаём статику (CSS, JS) если нужно
+    # Монтируем статику
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 else:
     print("ERROR: Frontend folder not found!")
