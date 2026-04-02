@@ -783,33 +783,33 @@
             } catch (error) {
                 statusSpan.innerHTML = `❌ Ошибка: ${error.message}`;
 
-                async function fullClearDatabase() {
-    if (!confirm('⚠️ ВНИМАНИЕ! Это действие удалит ВСЕХ сотрудников и их учётные записи. Вы уверены?')) return;
-    const statusSpan = document.getElementById('uploadStatus');
-    statusSpan.innerHTML = '⏳ Полная очистка...';
-    statusSpan.style.color = 'blue';
-    try {
-        const response = await fetchWithAuth(`${API_URL}/full-clear`, { method: 'DELETE' });
-        const result = await response.json();
-        if (response.ok) {
-            statusSpan.innerHTML = `✅ ${result.message}`;
-            statusSpan.style.color = 'green';
-            // Скрыть блок учётных записей и кнопку выгрузки
-            document.getElementById('uploadResult').style.display = 'none';
-            document.getElementById('exportAccountsBtn').style.display = 'none';
-            // Перезагрузить данные
-            loadDashboard();
-            loadEmployees();
-            loadDepartments();
-        } else {
-            statusSpan.innerHTML = `❌ ${result.detail || 'Ошибка'}`;
-            statusSpan.style.color = 'red';
+        async function fullClearDatabase() {
+            if (!confirm('⚠️ ВНИМАНИЕ! Это действие удалит ВСЕХ сотрудников и их учётные записи. Вы уверены?')) return;
+            const statusSpan = document.getElementById('uploadStatus');
+            statusSpan.innerHTML = '⏳ Полная очистка...';
+            statusSpan.style.color = 'blue';
+            try {
+                const response = await fetchWithAuth(`${API_URL}/full-clear`, { method: 'DELETE' });
+                const result = await response.json();
+                if (response.ok) {
+                    statusSpan.innerHTML = `✅ ${result.message}`;
+                    statusSpan.style.color = 'green';
+                    // Скрыть блок учётных записей и кнопку выгрузки
+                    document.getElementById('uploadResult').style.display = 'none';
+                    document.getElementById('exportAccountsBtn').style.display = 'none';
+                    // Перезагрузить данные
+                    loadDashboard();
+                    loadEmployees();
+                    loadDepartments();
+                } else {
+                    statusSpan.innerHTML = `❌ ${result.detail || 'Ошибка'}`;
+                    statusSpan.style.color = 'red';
+                }
+            } catch (error) {
+                statusSpan.innerHTML = `❌ Ошибка: ${error.message}`;
+                statusSpan.style.color = 'red';
+            }
         }
-    } catch (error) {
-        statusSpan.innerHTML = `❌ Ошибка: ${error.message}`;
-        statusSpan.style.color = 'red';
-    }
-}
             }
         }
 
@@ -831,7 +831,6 @@
         document.getElementById('clearDataBtn').addEventListener('click', clearData);
         document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
         document.getElementById('refreshBtn').addEventListener('click', refreshAll);
-        document.getElementById('fullClearDbBtn').addEventListener('click', fullClearDatabase);
         document.getElementById('exportAccountsBtn').addEventListener('click', () => {
             window.location.href = `${API_URL}/export/accounts?token=${token}`;
         });
@@ -880,7 +879,7 @@
                 loadEmployees();
             }
         }
-        
+                document.getElementById('fullClearDbBtn').addEventListener('click', fullClearDatabase);
     </script>
 </body>
 </html>
