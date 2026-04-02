@@ -26,13 +26,13 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 # Импорты из модулей проекта
-from database import (
+from .database import (
     get_db, Employee, init_db, Role, Competency, GradeLevel,
     CompetencyWeight, RoleTarget, History, ActionLog, User
 )
-from grade_calculator import calculate_grade
-from code_analyzer import analyze_code_from_text
-from text_analyzer import analyze_comments
+from .grade_calculator import calculate_grade
+from .code_analyzer import analyze_code_from_text
+from .text_analyzer import analyze_comments
 
 # ==================== Конфигурация ====================
 
