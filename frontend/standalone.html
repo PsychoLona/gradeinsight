@@ -334,14 +334,6 @@
                 <span id="uploadStatus" class="status"></span>
             </div>
 
-            <div class="filter-area">
-                <label>🏢 Отдел: </label>
-                <select id="departmentFilter">
-                    <option value="">Все отделы</option>
-                </select>
-                <button id="applyFilterBtn">Применить</button>
-            </div>
-
             <div id="uploadResult" style="display: none; margin-top: 10px; padding: 10px; background: #e8f4fd; border-radius: 12px;">
                 <h4>📋 Созданные учётные записи</h4>
                 <div id="accountsList" style="font-family: monospace; font-size: 12px;"></div>
@@ -367,9 +359,17 @@
                     </div>
                 </div>
 
-                <!-- Таблица сотрудников – занимает всю ширину -->
+                <!-- Таблица сотрудников – занимает всю ширину, внутри фильтр -->
                 <div class="card full-width">
                     <h2>👥 Сотрудники</h2>
+                    <!-- Фильтр теперь внутри карточки -->
+                    <div class="filter-area" style="margin-bottom: 20px;">
+                        <label>🏢 Отдел: </label>
+                        <select id="departmentFilter">
+                            <option value="">Все отделы</option>
+                        </select>
+                        <button id="applyFilterBtn">Применить</button>
+                    </div>
                     <div id="employeesTableContainer" class="loading">Загрузка...</div>
                 </div>
             </div>
@@ -385,15 +385,12 @@
     </div>
 
     <script>
+        // ==================== JavaScript (без изменений, полная копия из работающей версии) ====================
         const API_URL = '';
         let token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
         const employee_id = localStorage.getItem('employee_id');
         let chart = null;
-
-        function showSpinner(containerId) {
-            document.getElementById(containerId).innerHTML = '<div class="spinner"></div>';
-        }
 
         async function fetchWithAuth(url, options = {}) {
             const headers = {
@@ -529,7 +526,7 @@
                         </tr>
                     `;
                 }
-                html += '</tbody><table>';
+                html += '</tbody></table>';
                 document.getElementById('employeesTableContainer').innerHTML = html;
             } catch (error) {
                 console.error('Ошибка загрузки сотрудников:', error);
