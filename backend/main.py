@@ -338,6 +338,7 @@ def get_employees(
         }
         weights = get_competency_weights_from_db(emp.position, db)
         grade_result = calculate_grade(emp_data, weights, grade_levels)
+        recommendation = get_recommendation(grade_result["grade"], employee.formal_grade)
 
         result.append({
             "id": emp.id,
@@ -346,6 +347,8 @@ def get_employees(
             "experience": emp.experience,
             "metrics": emp_data,
             "grade_result": grade_result
+            "formal_grade": employee.formal_grade,
+            "recommendation": recommendation
         })
     return result
 
