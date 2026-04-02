@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+sqlalchemy
+pandas
+numpy
+python-multipart
+openpyxl
+pylint 
+radon 
+mccabe 
+nltk
+pymorphy2 

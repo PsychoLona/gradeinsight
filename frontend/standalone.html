@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradeInsight — Интеллектуальная система грейдирования</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        h1 { color: #333; margin-bottom: 5px; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
+        h2 { color: #555; margin: 30px 0 20px 0; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .chart-container { max-width: 500px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #667eea; color: white; }
+        tr:hover { background-color: #f5f5f5; }
+        button {
+            background-color: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #5a67d8; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background-color: #dc3545;
+        }
+        .grade-junior { color: #4CAF50; font-weight: bold; }
+        .grade-middle { color: #FFC107; font-weight: bold; }
+        .grade-senior { color: #9C27B0; font-weight: bold; }
+        .hipo-card {
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe6cc 100%);
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: inline-block;
+            width: calc(33% - 10px);
+            margin-right: 10px;
+        }
+        .hipo-card strong { color: #ff9800; }
+        .upload-area {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .upload-area input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        .status { margin-left: 10px; font-size: 14px; }
+        .action-buttons { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .gap-item { margin: 5px 0; padding: 8px; border-radius: 5px; }
+        .gap-good { background: #d4edda; color: #155724; }
+        .gap-need { background: #f8d7da; color: #721c24; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close { float: right; cursor: pointer; font-size: 24px; }
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .login-container button {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginForm" class="login-container" style="display: none;">
+        <h2>Вход в систему</h2>
+        <input type="text" id="username" placeholder="Логин">
+        <input type="password" id="password" placeholder="Пароль">
+        <button id="loginBtn">Войти</button>
+        <div id="loginMessage" style="color: red; margin-top: 10px;"></div>
+    </div>
+
+    <div id="appContent" style="display: none;">
+        <div class="container">
+            <button id="logoutBtn" class="logout-btn">Выйти</button>
+            <h1>📊 GradeInsight</h1>
+            <div class="subtitle">Интеллектуальная система поддержки принятия решений при грейдировании персонала</div>
+            
+            <div class="upload-area">
+                <h3 style="margin:0;">📂 Загрузить данные</h3>
+                <input type="file" id="uploadFile" accept=".csv,.xlsx">
+                <button id="uploadBtn">Загрузить</button>
+                <button id="clearDataBtn" class="btn-danger">🗑️ Очистить все данные</button>
+                <button id="exportExcelBtn" class="btn-success">📎 Скачать отчёт (Excel)</button>
+                <button id="exportAccountsBtn" class="btn-success" style="display: none;">📋 Выгрузить учётные записи</button>
+                <span id="uploadStatus" class="status"></span>
+            </div>
+            <div id="uploadResult" style="display: none; margin-top: 10px; padding: 10px; background: #e8f4fd; border-radius: 8px;">
+                <h4>📋 Созданные учётные записи</h4>
+                <div id="accountsList" style="font-family: monospace; font-size: 12px;"></div>
+            </div>
+            <div class="action-buttons">
+                <button id="refreshBtn">🔄 Обновить данные</button>
+            </div>
+            
+            <div id="hipoSection">
+                <h2>⭐ Сотрудники с высоким потенциалом (HiPo)</h2>
+                <div id="hipoContainer" class="loading">Загрузка...</div>
+            </div>
+            
+            <div id="chartSection">
+                <h2>📊 Распределение сотрудников по грейдам</h2>
+                <div class="chart-container">
+                    <canvas id="gradesChart" width="400" height="400"></canvas>
+                </div>
+            </div>
+            
+            <div id="employeesSection">
+                <h2>👥 Сотрудники</h2>
+                <div id="employeesTableContainer" class="loading">Загрузка...</div>
+            </div>
+        </div>
+        
+        <div id="gapModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeGapModal()">&times;</span>
+                <h3>📈 GAP-анализ</h3>
+                <div id="gapContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+        let token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        const employee_id = localStorage.getItem('employee_id');
+
+        let chart = null;
+
+        async function fetchWithAuth(url, options = {}) {
+            const headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('role');
+                localStorage.removeItem('employee_id');
+                location.reload();
+                throw new Error('Unauthorized');
+            }
+            return response;
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            localStorage.removeItem('employee_id');
+            location.reload();
+        });
+
+        async function checkAccounts() {
+            try {
+                const response = await fetchWithAuth(`${API_URL}/check-accounts`);
+                const data = await response.json();
+                if (data.exists) {
+                    document.getElementById('exportAccountsBtn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('exportAccountsBtn').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Ошибка проверки учётных записей:', error);
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetchWithAuth(`${API_URL}/dashboard`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const dashboard = await response.json();
+                
+                const ctx = document.getElementById('gradesChart').getContext('2d');
+                if (chart) chart.destroy();
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(dashboard.grades_count),
+                        datasets: [{
+                            label: 'Количество сотрудников',
+                            data: Object.values(dashboard.grades_count),
+                            backgroundColor: ['#4CAF50', '#FFC107', '#9C27B0', '#17a2b8'],
+                            borderRadius: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'top' } }
+                    }
+                });
+                
+                if (dashboard.hipo_employees && dashboard.hipo_employees.length > 0) {
+                    let hipoHtml = '';
+                    for (const h of dashboard.hipo_employees) {
+                        hipoHtml += `
+                            <div class="hipo-card">
+                                <strong>⭐ ${h.name}</strong><br>
+                                ${h.position || '—'}<br>
+                                Балл: ${h.score} | Грейд: ${h.grade}
+                            </div>
+                        `;
+                    }
+                    document.getElementById('hipoContainer').innerHTML = hipoHtml;
+                } else {
+                    document.getElementById('hipoContainer').innerHTML = '<p>Нет сотрудников с высоким потенциалом</p>';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки дашборда:', error);
+                document.getElementById('hipoContainer').innerHTML = '<p style="color:red;">Ошибка подключения к серверу</p>';
+            }
+        }
+        
+        async function loadEmployees() {
+            try {
+                const response = await fetchWithAuth(`${API_URL}/employees`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const employees = await response.json();
+                
+                if (employees.length === 0) {
+                    document.getElementById('employeesTableContainer').innerHTML = '<p>Нет данных. Загрузите файл с сотрудниками.</p>';
+                    return;
+                }
+                
+                let html = '<table><thead><tr>';
+                html += '<th>ID</th><th>Имя</th><th>Должность</th><th>Грейд</th><th>Балл</th>';
+                html += '<th>Задачи</th><th>Дедлайны</th><th>Действия</th>';
+                html += '</tr></thead><tbody>';
+                
+                for (const emp of employees) {
+                    const grade = emp.grade_result.grade;
+                    const gradeClass = `grade-${grade.toLowerCase()}`;
+                    
+                    html += '<tr>';
+                    html += `<td>${emp.id}</td>`;
+                    html += `<td>${emp.name}</td>`;
+                    html += `<td>${emp.position}</td>`;
+                    html += `<td class="${gradeClass}">${grade}</td>`;
+                    html += `<td>${emp.grade_result.total_score}</td>`;
+                    html += `<td>${emp.metrics.tasks_completed}</td>`;
+                    html += `<td>${emp.metrics.deadlines_met}%</td>`;
+                    html += `<td>
+                        <button onclick="viewEmployee(${emp.id})">👤 Профиль</button>
+                        <button onclick="viewGapAnalysis(${emp.id}, '${emp.name}')">📊 GAP-анализ</button>
+                    </td>`;
+                    html += '</tr>';
+                }
+                html += '</tbody></table>';
+                document.getElementById('employeesTableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сотрудников:', error);
+                document.getElementById('employeesTableContainer').innerHTML = '<p style="color:red;">Ошибка загрузки списка сотрудников</p>';
+            }
+        }
+        
+        function viewEmployee(id) {
+            window.location.href = `employee.html?id=${id}`;
+        }
+        
+        async function viewGapAnalysis(id, name) {
+            const modal = document.getElementById('gapModal');
+            const content = document.getElementById('gapContent');
+            content.innerHTML = '<p>Загрузка...</p>';
+            modal.style.display = 'flex';
+            
+            try {
+                const response = await fetchWithAuth(`${API_URL}/employees/${id}/gap_analysis`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    content.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                } else {
+                    let html = `<p><strong>Сотрудник:</strong> ${data.employee_name}</p>`;
+                    html += `<p><strong>Роль:</strong> ${data.role}</p>`;
+                    html += `<h4>Сравнение с целевым профилем:</h4>`;
+                    for (const g of data.gaps) {
+                        const statusClass = g.status === 'good' ? 'gap-good' : 'gap-need';
+                        html += `
+                            <div class="gap-item ${statusClass}">
+                                <strong>${getCompetencyName(g.competency)}</strong><br>
+                                Текущий: ${(g.current * 100).toFixed(0)}% | 
+                                Целевой: ${(g.target * 100).toFixed(0)}% | 
+                                Отставание: ${(g.gap * 100).toFixed(0)}%
+                                ${g.status === 'need_improvement' ? '⚠️ Требуется развитие' : '✅ Цель достигнута'}
+                            </div>
+                        `;
+                    }
+                    content.innerHTML = html;
+                }
+            } catch (error) {
+                content.innerHTML = `<p style="color:red;">Ошибка: ${error.message}</p>`;
+            }
+        }
+        
+        function getCompetencyName(eng) {
+            const names = {
+                'tasks': 'Выполнение задач',
+                'deadlines': 'Соблюдение сроков',
+                'code_quality': 'Качество кода',
+                'communication': 'Коммуникации'
+            };
+            return names[eng] || eng;
+        }
+        
+        function closeGapModal() {
+            document.getElementById('gapModal').style.display = 'none';
+        }
+        
+        async function uploadFile() {
+            const fileInput = document.getElementById('uploadFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Выберите файл');
+                return;
+            }
+            const statusSpan = document.getElementById('uploadStatus');
+            statusSpan.innerHTML = '⏳ Загрузка...';
+            statusSpan.style.color = 'blue';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetchWithAuth(`${API_URL}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    statusSpan.innerHTML = `✅ ${result.message}`;
+                    statusSpan.style.color = 'green';
+                    
+                    // Показываем блок с учётными записями
+                    if (result.users && result.users.length > 0) {
+                        const accountsDiv = document.getElementById('accountsList');
+                        let html = '';
+                        for (const u of result.users) {
+                            if (u.password !== 'already exists') {
+                                html += `<div><strong>${u.name}</strong>: логин = <code>${u.login}</code>, пароль = <code>${u.password}</code></div>`;
+                            } else {
+                                html += `<div><strong>${u.name}</strong>: логин = <code>${u.login}</code> (учётная запись уже существовала)</div>`;
+                            }
+                        }
+                        accountsDiv.innerHTML = html;
+                        document.getElementById('uploadResult').style.display = 'block';
+                        // Показываем кнопку выгрузки, если есть новые учётные записи
+                        checkAccounts();
+                    } else {
+                        document.getElementById('uploadResult').style.display = 'none';
+                    }
+                    
+                    loadDashboard();
+                    loadEmployees();
+                } else {
+                    statusSpan.innerHTML = `❌ ${result.detail}`;
+                    statusSpan.style.color = 'red';
+                    document.getElementById('uploadResult').style.display = 'none';
+                }
+            } catch (error) {
+                statusSpan.innerHTML = `❌ Ошибка: ${error.message}`;
+                statusSpan.style.color = 'red';
+                document.getElementById('uploadResult').style.display = 'none';
+            }
+        }
+        
+        async function clearData() {
+            if (!confirm('Удалить всех сотрудников? Данные будут потеряны.')) return;
+            const statusSpan = document.getElementById('uploadStatus');
+            statusSpan.innerHTML = '⏳ Удаление...';
+            
+            try {
+                const response = await fetchWithAuth(`${API_URL}/employees`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                statusSpan.innerHTML = `✅ ${result.message}`;
+                // Скрываем блок с учётными записями и кнопку выгрузки
+                document.getElementById('uploadResult').style.display = 'none';
+                document.getElementById('exportAccountsBtn').style.display = 'none';
+                loadDashboard();
+                loadEmployees();
+            } catch (error) {
+                statusSpan.innerHTML = `❌ Ошибка: ${error.message}`;
+            }
+        }
+        
+        function exportExcel() {
+            window.location.href = `${API_URL}/export/excel?token=${token}`;
+        }
+        
+        function refreshAll() {
+            loadDashboard();
+            loadEmployees();
+            document.getElementById('uploadStatus').innerHTML = '';
+        }
+        
+        document.getElementById('uploadBtn').addEventListener('click', uploadFile);
+        document.getElementById('clearDataBtn').addEventListener('click', clearData);
+        document.getElementById('exportExcelBtn').addEventListener('click', exportExcel);
+        document.getElementById('refreshBtn').addEventListener('click', refreshAll);
+        document.getElementById('exportAccountsBtn').addEventListener('click', () => {
+            window.location.href = `${API_URL}/export/accounts?token=${token}`;
+        });
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('gapModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+        
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            try {
+                const res = await fetch(`${API_URL}/token`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('role', data.role);
+                    localStorage.setItem('employee_id', data.employee_id);
+                    location.reload();
+                } else {
+                    document.getElementById('loginMessage').innerText = 'Неверный логин или пароль';
+                }
+            } catch (err) {
+                document.getElementById('loginMessage').innerText = 'Ошибка соединения';
+            }
+        });
+        
+        if (!token) {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('appContent').style.display = 'none';
+        } else {
+            if (role === 'employee' && employee_id) {
+                window.location.href = `employee.html?id=${employee_id}`;
+            } else {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('appContent').style.display = 'block';
+                checkAccounts();  // проверяем наличие паролей
+                loadDashboard();
+                loadEmployees();
+            }
+        }
+    </script>
+</body>
+</html>
