@@ -641,7 +641,7 @@
                         <td>${emp.grade_result.total_score}</td>
                         <td>${emp.metrics.tasks_completed}</td>
                         <td>${emp.metrics.deadlines_met}%</td>
-                        html += `<td class="recommendation-${recClass}">${emp.recommendation}</td>`;
+                        <td class="recommendation-${recClass}">${emp.recommendation}</td>
                         <td>
                             <button onclick="viewEmployee(${emp.id})">👤 Профиль</button>
                             <button onclick="viewGapAnalysis(${emp.id}, '${emp.name}')">📊 GAP-анализ</button>
