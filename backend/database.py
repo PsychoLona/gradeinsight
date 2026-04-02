@@ -69,6 +69,8 @@ class Employee(Base):
     code_quality_score = Column(Float, default=0.0)
     communication_score = Column(Float, default=0.0)
     grade = Column(String, default="Не определен")
+        formal_grade = Column(String, default="")
+    recommendation = Column(String, default="")
 
     user = relationship("User", back_populates="employee", uselist=False)
     history = relationship("History", back_populates="employee", cascade="all, delete-orphan")
