@@ -1,7 +1,22 @@
 """
 GradeInsight API — интеллектуальная система поддержки принятия решений при грейдировании персонала
 """
-
+import sys
+import os
+print("Python version:", sys.version)
+print("Current directory:", os.getcwd())
+print("Files in directory:", os.listdir('.'))
+try:
+    print("Importing database...")
+    from .database import (
+        get_db, Employee, init_db, Role, Competency, GradeLevel,
+        CompetencyWeight, RoleTarget, History, ActionLog, User
+    )
+    print("Database imported successfully")
+except Exception as e:
+    print(f"Error: {e}")
+    raise
+    
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from io import BytesIO, StringIO
