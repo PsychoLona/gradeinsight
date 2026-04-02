@@ -136,7 +136,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 from fastapi.staticfiles import StaticFiles
-rontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend"))
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend"))
 if os.path.exists(frontend_path):
     app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
 else:
