@@ -137,11 +137,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 from fastapi.staticfiles import StaticFiles
-frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend"))
-if os.path.exists(frontend_path):
-    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
-else:
-    print(f"Frontend folder not found at {frontend_path}")
 from fastapi.responses import FileResponse
 # Определяем путь к папке frontend (относительно расположения main.py)
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend"))
@@ -153,10 +148,6 @@ if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 else:
     print("ERROR: Frontend folder not found!")
-
-# Раздаём статику (CSS, JS) – не обязательно, но пригодится
-if os.path.exists(frontend_dir):
-    app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
 @app.get("/")
 @app.get("/standalone.html")
