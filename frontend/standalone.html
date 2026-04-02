@@ -395,6 +395,9 @@
                 min-width: 450px;
             }
         }
+        .recommendation-up { color: #48bb78; font-weight: bold; }
+        .recommendation-down { color: #f56565; font-weight: bold; }
+        .recommendation-keep { color: #718096; }
     </style>
 </head>
 <body>
@@ -638,6 +641,7 @@
                         <td>${emp.grade_result.total_score}</td>
                         <td>${emp.metrics.tasks_completed}</td>
                         <td>${emp.metrics.deadlines_met}%</td>
+                        html += `<td class="recommendation-${recClass}">${emp.recommendation}</td>`;
                         <td>
                             <button onclick="viewEmployee(${emp.id})">👤 Профиль</button>
                             <button onclick="viewGapAnalysis(${emp.id}, '${emp.name}')">📊 GAP-анализ</button>
