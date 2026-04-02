@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -5,11 +6,18 @@ from datetime import datetime
 import hashlib
 import secrets
 
-DATABASE_URL = "sqlite:///./gradeinsight.db"
+# Получаем строку подключения из переменной окружения, иначе SQLite (локально)
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./gradeinsight.db")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# Для SQLite нужно добавить check_same_thread=False
+connect_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 # Функции хеширования (без bcrypt)
 def hash_password(password: str) -> str:
