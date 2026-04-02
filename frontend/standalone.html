@@ -26,7 +26,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(2px);
@@ -61,29 +61,61 @@
             padding-left: 12px;
         }
 
+        /* Сетка для основных блоков */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            border: 1px solid #edf2f7;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+
         h2 {
             color: #2d3748;
-            margin: 30px 0 20px 0;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
+            margin: 0 0 20px 0;
             font-weight: 600;
             font-size: 1.5rem;
+            border-left: 4px solid #667eea;
+            padding-left: 12px;
         }
 
         .chart-container {
-            max-width: 500px;
+            max-width: 100%;
             margin: 0 auto;
-            transition: transform 0.3s;
-        }
-
-        .chart-container:hover {
-            transform: scale(1.02);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -157,9 +189,6 @@
             padding: 15px;
             margin: 10px 0;
             border-radius: 16px;
-            display: inline-block;
-            width: calc(33% - 10px);
-            margin-right: 10px;
             transition: all 0.2s;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
@@ -304,7 +333,15 @@
                 <button id="exportAccountsBtn" class="btn-success" style="display: none;">📋 Выгрузить учётные записи</button>
                 <span id="uploadStatus" class="status"></span>
             </div>
-        
+
+            <div class="filter-area">
+                <label>🏢 Отдел: </label>
+                <select id="departmentFilter">
+                    <option value="">Все отделы</option>
+                </select>
+                <button id="applyFilterBtn">Применить</button>
+            </div>
+
             <div id="uploadResult" style="display: none; margin-top: 10px; padding: 10px; background: #e8f4fd; border-radius: 12px;">
                 <h4>📋 Созданные учётные записи</h4>
                 <div id="accountsList" style="font-family: monospace; font-size: 12px;"></div>
@@ -314,28 +351,27 @@
                 <button id="refreshBtn">🔄 Обновить данные</button>
             </div>
 
-            <div id="hipoSection">
-                <h2>⭐ Сотрудники с высоким потенциалом (HiPo)</h2>
-                <div id="hipoContainer" class="loading">Загрузка...</div>
-            </div>
-
-            <div id="chartSection">
-                <h2>📊 Распределение сотрудников по грейдам</h2>
-                <div class="chart-container">
-                    <canvas id="gradesChart" width="400" height="400"></canvas>
+            <!-- Сетка из плиток -->
+            <div class="dashboard-grid">
+                <!-- Блок HiPo -->
+                <div class="card">
+                    <h2>⭐ Сотрудники с высоким потенциалом (HiPo)</h2>
+                    <div id="hipoContainer" class="loading">Загрузка...</div>
                 </div>
-            </div>
-            
-            <div class="filter-area">
-                <label>🏢 Отдел: </label>
-                <select id="departmentFilter">
-                    <option value="">Все отделы</option>
-                </select>
-                <button id="applyFilterBtn">Применить</button>
-            </div>
-            <div id="employeesSection">
-                <h2>👥 Сотрудники</h2>
-                <div id="employeesTableContainer" class="loading">Загрузка...</div>
+
+                <!-- Блок распределения по грейдам -->
+                <div class="card">
+                    <h2>📊 Распределение по грейдам</h2>
+                    <div class="chart-container">
+                        <canvas id="gradesChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+
+                <!-- Таблица сотрудников – занимает всю ширину -->
+                <div class="card full-width">
+                    <h2>👥 Сотрудники</h2>
+                    <div id="employeesTableContainer" class="loading">Загрузка...</div>
+                </div>
             </div>
         </div>
 
