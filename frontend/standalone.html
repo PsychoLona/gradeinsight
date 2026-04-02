@@ -305,16 +305,16 @@
                     return;
                 }
                 
-                let html = '点table<thead>点';
+                let html = '<table><thead><tr>';
                 html += '<th>ID</th><th>Имя</th><th>Должность</th><th>Грейд</th><th>Балл</th>';
                 html += '<th>Задачи</th><th>Дедлайны</th><th>Действия</th>';
-                html += '</thead><tbody>';
+                html += '</tr></thead><tbody>';
                 
                 for (const emp of employees) {
                     const grade = emp.grade_result.grade;
                     const gradeClass = `grade-${grade.toLowerCase()}`;
                     
-                    html += '点tr点';
+                    html += '<tr>';
                     html += `<td>${emp.id}</td>`;
                     html += `<td>${emp.name}</td>`;
                     html += `<td>${emp.position}</td>`;
@@ -326,9 +326,9 @@
                         <button onclick="viewEmployee(${emp.id})">👤 Профиль</button>
                         <button onclick="viewGapAnalysis(${emp.id}, '${emp.name}')">📊 GAP-анализ</button>
                     </td>`;
-                    html += '点/tr点';
+                    html += '</tr>';
                 }
-                html += '</tbody>点/table>';
+                html += '</tbody></table>';
                 document.getElementById('employeesTableContainer').innerHTML = html;
             } catch (error) {
                 console.error('Ошибка загрузки сотрудников:', error);
