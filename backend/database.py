@@ -60,6 +60,7 @@ class Employee(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     position = Column(String)
+    department = Column(String, default="")
     experience = Column(Integer, default=0)
     photo_url = Column(String, default="")
     tasks_completed = Column(Integer, default=0)
