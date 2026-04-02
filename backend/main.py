@@ -818,16 +818,6 @@ def set_role_targets(role_id: int, targets: dict, db: Session = Depends(get_db),
     db.commit()
     return {"message": "Целевые значения установлены"}
 
-@app.get("/migrate/add_department")
-async def add_department_column():
-    from database import engine
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("ALTER TABLE employees ADD COLUMN IF NOT EXISTS department VARCHAR(255) DEFAULT ''"))
-            conn.commit()
-            return {"message": "Column 'department' added successfully!"}
-    except Exception as e:
-        return {"error": str(e)}
 # ==================== Запуск ====================
 
 if __name__ == "__main__":
