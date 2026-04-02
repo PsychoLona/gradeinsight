@@ -31,3 +31,18 @@ def calculate_grade(employee_data, competency_weights, grade_levels):
         "grade": grade,
         "normalized_metrics": normalized
     }
+
+def get_recommendation(calculated_grade: str, formal_grade: str) -> str:
+    if not formal_grade:
+        return ""
+    grades = ["Junior", "Middle", "Senior"]
+    if formal_grade not in grades or calculated_grade not in grades:
+        return ""
+    formal_idx = grades.index(formal_grade)
+    calc_idx = grades.index(calculated_grade)
+    if calc_idx > formal_idx:
+        return "Повысить"
+    elif calc_idx < formal_idx:
+        return "Понизить"
+    else:
+        return "Оставить"
