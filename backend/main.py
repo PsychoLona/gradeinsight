@@ -472,7 +472,12 @@ async def upload_employees(
             if col not in df.columns:
                 raise HTTPException(status_code=400, detail=f"Отсутствует колонка: {col}")
                 
+        # Сначала удаляем связанные записи (историю и логи)
+        db.query(History).delete()
+        db.query(ActionLog).delete()
+        # Отвязываем пользователей
         db.query(User).update({User.employee_id: None}, synchronize_session=False)
+        # Удаляем сотрудников
         db.query(Employee).delete()
         created_users = []
 
