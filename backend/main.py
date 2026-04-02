@@ -853,7 +853,7 @@ def set_role_targets(role_id: int, targets: dict, db: Session = Depends(get_db),
     return {"message": "Целевые значения установлены"}
     
 @app.get("/migrate/add_grade_columns")
-async def add_grade_columns(db: Session = Depends(get_db), current_user: User = Depends(require_role(["admin"]))):
+async def add_grade_columns(db: Session = Depends(get_db)):
     try:
         # Проверяем, существует ли колонка formal_grade
         from sqlalchemy import inspect, text
