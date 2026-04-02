@@ -316,8 +316,15 @@ def register(username: str, password: str, role: str = "employee", employee_id: 
 # ==================== Сотрудники (только admin/hr) ====================
 
 @app.get("/employees")
-def get_employees(db: Session = Depends(get_db), current_user: User = Depends(require_role(["admin", "hr"]))):
-    employees = db.query(Employee).all()
+def get_employees(
+    department: Optional[str] = None,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_role(["admin", "hr"]))
+):
+    query = db.query(Employee)
+    if department:
+        query = query.filter(Employee.department == department)
+    employees = query.all()
     result = []
     grade_levels = get_grade_levels_from_db(db)
 
@@ -472,6 +479,7 @@ async def upload_employees(
             emp = Employee(
                 name=row['name'],
                 position=row['position'],
+                department=row.get('department', ''),
                 experience=int(row.get('experience', 0)),
                 photo_url=row.get('photo_url', '')
             )
@@ -646,8 +654,15 @@ async def analyze_employee_comments(
 # ==================== Дашборд (только admin/hr) ====================
 
 @app.get("/dashboard")
-def get_dashboard(db: Session = Depends(get_db), current_user: User = Depends(require_role(["admin", "hr"]))):
-    employees = db.query(Employee).all()
+def get_dashboard(
+    department: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "hr"]))
+):
+    query = db.query(Employee)
+    if department:
+        query = query.filter(Employee.department == department)
+    employees = query.all()
     grades_count = {"Junior": 0, "Middle": 0, "Senior": 0}
     hipo_list = []
 
@@ -680,6 +695,13 @@ def get_dashboard(db: Session = Depends(get_db), current_user: User = Depends(re
         "total_employees": len(employees)
     }
 
+@app.get("/departments")
+def get_departments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "hr"]))
+):
+    departments = db.query(Employee.department).distinct().all()
+    return [d[0] for d in departments if d[0]]
 # ==================== Экспорт в Excel (только admin/hr) ====================
 
 @app.get("/export/excel")
