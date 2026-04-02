@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>GradeInsight — Интеллектуальная система грейдирования</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -16,7 +16,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
             animation: fadeIn 0.5s ease;
         }
 
@@ -30,22 +30,16 @@
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(2px);
-            border-radius: 30px;
-            padding: 30px;
+            border-radius: 28px;
+            padding: 20px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
-        }
-
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
         }
 
         h1 {
             color: #2d3748;
-            margin-bottom: 5px;
-            font-size: 2.2rem;
+            margin-bottom: 4px;
+            font-size: 1.8rem;
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             background-clip: text;
@@ -55,56 +49,39 @@
 
         .subtitle {
             color: #718096;
-            margin-bottom: 30px;
-            font-size: 0.95rem;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
             border-left: 3px solid #667eea;
-            padding-left: 12px;
+            padding-left: 10px;
         }
 
-        /* Сетка для основных блоков */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
+            gap: 20px;
             margin-top: 20px;
         }
 
         .card {
             background: white;
-            border-radius: 24px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 16px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
             border: 1px solid #edf2f7;
-        }
-
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.1);
         }
 
         .full-width {
             grid-column: span 2;
         }
 
-        /* Адаптивность */
-        @media (max-width: 900px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .full-width {
-                grid-column: span 1;
-            }
-        }
-
         h2 {
             color: #2d3748;
-            margin: 0 0 20px 0;
+            margin: 0 0 16px 0;
             font-weight: 600;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             border-left: 4px solid #667eea;
-            padding-left: 12px;
+            padding-left: 10px;
         }
 
         .chart-container {
@@ -112,21 +89,23 @@
             margin: 0 auto;
         }
 
-        /* Стили таблицы с улучшенным разделением */
+        /* Таблица с горизонтальной прокруткой */
         .employees-table-wrapper {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-top: 8px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            min-width: 600px;
         }
 
         th, td {
-            padding: 12px 15px;
+            padding: 10px 12px;
             text-align: left;
             border-bottom: 1px solid #edf2f7;
             border-right: 1px solid #edf2f7;
@@ -144,22 +123,13 @@
             top: 0;
             cursor: pointer;
             user-select: none;
-            transition: background 0.2s;
-        }
-
-        th:hover {
-            background: linear-gradient(135deg, #5a67d8, #6b46a0);
+            font-size: 0.8rem;
         }
 
         th i {
             margin-left: 5px;
             font-style: normal;
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-
-        tr {
-            transition: background 0.2s ease;
+            font-size: 0.7rem;
         }
 
         tr:hover {
@@ -174,22 +144,17 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             font-weight: 500;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            font-size: 0.85rem;
         }
 
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            filter: brightness(1.05);
-        }
-
-        button:active {
-            transform: translateY(1px);
         }
 
         .btn-success {
@@ -202,9 +167,11 @@
 
         .logout-btn {
             position: absolute;
-            top: 25px;
-            right: 30px;
+            top: 20px;
+            right: 20px;
             background: linear-gradient(135deg, #f56565, #e53e3e);
+            padding: 6px 12px;
+            font-size: 0.8rem;
         }
 
         .grade-junior { color: #48bb78; font-weight: bold; }
@@ -214,33 +181,34 @@
         .hipo-card {
             background: linear-gradient(135deg, #fff5e6 0%, #ffe6cc 100%);
             border-left: 4px solid #ed8936;
-            padding: 15px;
-            margin: 10px 0;
+            padding: 12px;
+            margin: 8px 0;
             border-radius: 16px;
             transition: all 0.2s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .hipo-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
 
         .upload-area, .filter-area {
             background: #f7fafc;
-            padding: 20px;
+            padding: 16px;
             border-radius: 20px;
-            margin-bottom: 20px;
-            transition: all 0.2s;
+            margin-bottom: 16px;
         }
 
-        .upload-area:hover, .filter-area:hover {
-            background: #edf2f7;
+        .upload-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .upload-area input {
+            flex: 1;
+            min-width: 150px;
         }
 
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
@@ -263,24 +231,16 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            animation: fadeIn 0.2s;
         }
 
         .modal-content {
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 24px;
-            max-width: 500px;
-            width: 90%;
+            max-width: 90%;
+            width: 400px;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .close {
@@ -288,22 +248,16 @@
             cursor: pointer;
             font-size: 24px;
             color: #a0aec0;
-            transition: color 0.2s;
-        }
-
-        .close:hover {
-            color: #4a5568;
         }
 
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
+            max-width: 90%;
+            width: 380px;
+            margin: 80px auto;
             background: white;
-            padding: 30px;
-            border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            padding: 24px;
+            border-radius: 28px;
             text-align: center;
-            animation: fadeIn 0.5s;
         }
 
         .login-container input {
@@ -312,13 +266,6 @@
             margin: 10px 0;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
-            transition: all 0.2s;
-        }
-
-        .login-container input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
         }
 
         .spinner {
@@ -335,124 +282,119 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* ===== Адаптивность для мобильных устройств ===== */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
 
-    .container {
-        padding: 20px 15px;
-    }
+        /* Адаптивность для мобильных */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
 
-    h1 {
-        font-size: 1.8rem;
-    }
+            .container {
+                padding: 16px;
+            }
 
-    .subtitle {
-        font-size: 0.85rem;
-        margin-bottom: 20px;
-    }
+            h1 {
+                font-size: 1.5rem;
+            }
 
-    .dashboard-grid {
-        gap: 15px;
-        margin-top: 15px;
-    }
+            .subtitle {
+                font-size: 0.75rem;
+                margin-bottom: 16px;
+            }
 
-    .card {
-        padding: 15px;
-    }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
 
-    h2 {
-        font-size: 1.3rem;
-        margin-bottom: 15px;
-    }
+            .full-width {
+                grid-column: span 1;
+            }
 
-    .upload-area, .filter-area {
-        padding: 15px;
-        flex-direction: column;
-        align-items: stretch;
-    }
+            .card {
+                padding: 14px;
+            }
 
-    .upload-area button, .filter-area button {
-        width: 100%;
-        margin: 5px 0;
-    }
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 12px;
+            }
 
-    .upload-area input, .filter-area select {
-        width: 100%;
-        margin: 5px 0;
-    }
+            .upload-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
 
-    .action-buttons {
-        flex-direction: column;
-        gap: 8px;
-    }
+            .upload-area input, .upload-area button, .filter-area select, .filter-area button {
+                width: 100%;
+            }
 
-    .action-buttons button {
-        width: 100%;
-    }
+            .action-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
 
-    .hipo-card {
-        width: 100%;
-        margin-right: 0;
-    }
+            .action-buttons button {
+                width: 100%;
+            }
 
-    .employees-table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
+            .hipo-card {
+                width: 100%;
+                margin: 8px 0;
+            }
 
-    table {
-        font-size: 0.75rem;
-    }
+            .logout-btn {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-bottom: 16px;
+                display: inline-block;
+                width: 100%;
+            }
 
-    th, td {
-        padding: 8px 6px;
-        white-space: nowrap;
-    }
+            .employee-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
 
-    th {
-        font-size: 0.75rem;
-    }
+            table {
+                font-size: 0.75rem;
+                min-width: 500px;
+            }
 
-    button {
-        padding: 6px 12px;
-        font-size: 0.75rem;
-    }
+            th, td {
+                padding: 8px 6px;
+            }
 
-    .grade-badge {
-        font-size: 1rem;
-        padding: 4px 12px;
-    }
+            button {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+        }
 
-    .employee-name {
-        font-size: 1.2rem;
-    }
-}
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
 
-/* Для очень маленьких экранов (ширина < 480px) */
-@media (max-width: 480px) {
-    .container {
-        padding: 15px 10px;
-    }
+            .container {
+                padding: 12px;
+            }
 
-    h1 {
-        font-size: 1.5rem;
-    }
+            h1 {
+                font-size: 1.3rem;
+            }
 
-    .subtitle {
-        font-size: 0.75rem;
-    }
+            .subtitle {
+                font-size: 0.7rem;
+            }
 
-    table {
-        font-size: 0.7rem;
-    }
-
-    th, td {
-        padding: 6px 4px;
-    }
-}
+            table {
+                font-size: 0.7rem;
+                min-width: 450px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -489,15 +431,12 @@
                 <button id="refreshBtn">🔄 Обновить данные</button>
             </div>
 
-            <!-- Сетка из плиток -->
             <div class="dashboard-grid">
-                <!-- Блок HiPo -->
                 <div class="card">
                     <h2>⭐ Сотрудники с высоким потенциалом (HiPo)</h2>
                     <div id="hipoContainer" class="loading">Загрузка...</div>
                 </div>
 
-                <!-- Блок распределения по грейдам -->
                 <div class="card">
                     <h2>📊 Распределение по грейдам</h2>
                     <div class="chart-container">
@@ -505,11 +444,9 @@
                     </div>
                 </div>
 
-                <!-- Таблица сотрудников – занимает всю ширину, внутри фильтр -->
                 <div class="card full-width">
                     <h2>👥 Сотрудники</h2>
-                    <!-- Фильтр внутри карточки -->
-                    <div class="filter-area" style="margin-bottom: 20px;">
+                    <div class="filter-area" style="margin-bottom: 16px;">
                         <label>🏢 Отдел: </label>
                         <select id="departmentFilter">
                             <option value="">Все отделы</option>
