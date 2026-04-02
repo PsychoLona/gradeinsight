@@ -251,6 +251,117 @@
         .recommendations li, .ipr li {
             margin: 8px 0;
         }
+        /* ===== Адаптивность для мобильных устройств ===== */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 20px 15px;
+    }
+
+    .employee-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .grade-badge {
+        font-size: 1.2rem;
+        padding: 4px 12px;
+        align-self: flex-start;
+    }
+
+    .employee-name {
+        font-size: 1.4rem;
+    }
+
+    .employee-position {
+        font-size: 1rem;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .full-width-card {
+        grid-column: span 1;
+    }
+
+    .profile-card {
+        padding: 15px;
+    }
+
+    .metrics-edit {
+        padding: 12px;
+    }
+
+    .metrics-edit input {
+        width: 80px;
+        margin: 5px 5px 5px 0;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .actions-container {
+        max-height: 150px;
+    }
+
+    .actions-list li {
+        font-size: 0.8rem;
+    }
+
+    .toast {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        text-align: center;
+    }
+
+    .back-link {
+        font-size: 0.9rem;
+    }
+
+    .logout-btn {
+        top: 15px;
+        right: 15px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px 10px;
+    }
+
+    .employee-name {
+        font-size: 1.2rem;
+    }
+
+    .grade-badge {
+        font-size: 1rem;
+    }
+
+    .profile-card h3 {
+        font-size: 1rem;
+    }
+
+    .metrics-edit label {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .metrics-edit input {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
     </style>
 </head>
 <body>
