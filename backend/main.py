@@ -145,8 +145,12 @@ from fastapi.responses import FileResponse
 # Определяем путь к папке frontend (относительно расположения main.py)
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../frontend"))
 print(f"Frontend directory: {frontend_dir}")
+print(f"Frontend exists: {os.path.exists(frontend_dir)}")
 if os.path.exists(frontend_dir):
     print(f"Files in frontend: {os.listdir(frontend_dir)}")
+else:
+    print("ERROR: Frontend folder not found!")
+
     # Опционально: раздаём статику (CSS, JS) если нужно
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 else:
@@ -319,12 +323,6 @@ def register(username: str, password: str, role: str = "employee", employee_id: 
     db.add(user)
     db.commit()
     return {"message": "User created"}
-
-# ==================== Базовый эндпоинт ====================
-
-@app.get("/")
-def root():
-    return {"message": "GradeInsight API v2.0"}
 
 # ==================== Сотрудники (только admin/hr) ====================
 
