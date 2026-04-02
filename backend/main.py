@@ -50,7 +50,7 @@ try:
     print("Database imported")
 
     print("Importing grade_calculator...")
-    from grade_calculator import calculate_grade
+    from grade_calculator import calculate_grade, get_recommendation
     print("grade_calculator imported")
 
     print("Importing code_analyzer...")
