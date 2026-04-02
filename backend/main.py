@@ -1,22 +1,12 @@
 """
 GradeInsight API — интеллектуальная система поддержки принятия решений при грейдировании персонала
 """
+
 import sys
 import os
-print("Python version:", sys.version)
-print("Current directory:", os.getcwd())
-print("Files in directory:", os.listdir('.'))
-try:
-    print("Importing database...")
-    from .database import (
-        get_db, Employee, init_db, Role, Competency, GradeLevel,
-        CompetencyWeight, RoleTarget, History, ActionLog, User
-    )
-    print("Database imported successfully")
-except Exception as e:
-    print(f"Error: {e}")
-    raise
-    
+# Добавляем папку backend в путь поиска модулей
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from io import BytesIO, StringIO
@@ -28,12 +18,10 @@ import os
 import re
 import secrets
 import string
-import sys
 
 import openpyxl
 import pandas as pd
 from fastapi import FastAPI, Depends, HTTPException, File, UploadFile
-from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -41,14 +29,14 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
-# Импорты из модулей проекта
-from .database import (
+# Импорты из модулей проекта (абсолютные, без точки)
+from database import (
     get_db, Employee, init_db, Role, Competency, GradeLevel,
     CompetencyWeight, RoleTarget, History, ActionLog, User
 )
-from .grade_calculator import calculate_grade
-from .code_analyzer import analyze_code_from_text
-from .text_analyzer import analyze_comments
+from grade_calculator import calculate_grade
+from code_analyzer import analyze_code_from_text
+from text_analyzer import analyze_comments
 
 # ==================== Конфигурация ====================
 
