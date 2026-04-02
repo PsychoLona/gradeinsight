@@ -181,7 +181,13 @@
                     <canvas id="gradesChart" width="400" height="400"></canvas>
                 </div>
             </div>
-            
+            <div class="filter-area">
+                <label>Отдел: </label>
+                <select id="departmentFilter">
+                    <option value="">Все отделы</option>
+                </select>
+                <button id="applyFilterBtn">Применить</button>
+            </div>
             <div id="employeesSection">
                 <h2>👥 Сотрудники</h2>
                 <div id="employeesTableContainer" class="loading">Загрузка...</div>
