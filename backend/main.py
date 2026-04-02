@@ -445,76 +445,81 @@ async def upload_employees(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role(["admin", "hr"]))
 ):
-    filename = file.filename
-    contents = await file.read()
-
     try:
-        if filename.endswith('.csv'):
-            df = pd.read_csv(BytesIO(contents))
-        elif filename.endswith('.xlsx'):
-            df = pd.read_excel(BytesIO(contents))
-        else:
-            raise HTTPException(status_code=400, detail="Поддерживаются только .csv и .xlsx")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Ошибка чтения файла: {str(e)}")
+        filename = file.filename
+        contents = await file.read()
 
-    required_columns = ['name', 'position', 'experience']
-    for col in required_columns:
-        if col not in df.columns:
-            raise HTTPException(status_code=400, detail=f"Отсутствует колонка: {col}")
+        try:
+            if filename.endswith('.csv'):
+                df = pd.read_csv(BytesIO(contents))
+            elif filename.endswith('.xlsx'):
+                df = pd.read_excel(BytesIO(contents))
+            else:
+                raise HTTPException(status_code=400, detail="Поддерживаются только .csv и .xlsx")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Ошибка чтения файла: {str(e)}")
 
-    db.query(Employee).delete()
-    created_users = []
+        required_columns = ['name', 'position', 'experience']
+        for col in required_columns:
+            if col not in df.columns:
+                raise HTTPException(status_code=400, detail=f"Отсутствует колонка: {col}")
 
-    for _, row in df.iterrows():
-        emp = Employee(
-            name=row['name'],
-            position=row['position'],
-            experience=int(row.get('experience', 0)),
-            photo_url=row.get('photo_url', '')
-        )
-        db.add(emp)
-        db.flush()
+        db.query(Employee).delete()
+        created_users = []
 
-        username = transliterate(emp.name)
-        existing_user = db.query(User).filter(User.username == username).first()
-        if not existing_user:
-            password = generate_password()
-            hashed = User.hash_password(password)
-            new_user = User(
-                username=username,
-                hashed_password=hashed,
-                role="employee",
-                employee_id=emp.id,
-                is_active=True
+        for _, row in df.iterrows():
+            emp = Employee(
+                name=row['name'],
+                position=row['position'],
+                experience=int(row.get('experience', 0)),
+                photo_url=row.get('photo_url', '')
             )
-            db.add(new_user)
-            created_users.append({
-                "name": emp.name,
-                "login": username,
-                "password": password
-            })
-        else:
-            existing_user.employee_id = emp.id
-            if existing_user.role != "employee":
-                existing_user.role = "employee"
-            created_users.append({
-                "name": emp.name,
-                "login": existing_user.username,
-                "password": "already exists"
-            })
+            db.add(emp)
+            db.flush()
 
-    db.commit()
+            username = transliterate(emp.name)
+            existing_user = db.query(User).filter(User.username == username).first()
+            if not existing_user:
+                password = generate_password()
+                hashed = User.hash_password(password)
+                new_user = User(
+                    username=username,
+                    hashed_password=hashed,
+                    role="employee",
+                    employee_id=emp.id,
+                    is_active=True
+                )
+                db.add(new_user)
+                created_users.append({
+                    "name": emp.name,
+                    "login": username,
+                    "password": password
+                })
+            else:
+                existing_user.employee_id = emp.id
+                if existing_user.role != "employee":
+                    existing_user.role = "employee"
+                created_users.append({
+                    "name": emp.name,
+                    "login": existing_user.username,
+                    "password": "already exists"
+                })
 
-    new_passwords = [u for u in created_users if u.get('password') and u['password'] != 'already exists']
-    if new_passwords:
-        save_passwords(new_passwords)
+        db.commit()
 
-    return {
-        "message": f"Загружено {len(df)} сотрудников",
-        "users": created_users
-    }
+        new_passwords = [u for u in created_users if u.get('password') and u['password'] != 'already exists']
+        if new_passwords:
+            save_passwords(new_passwords)
 
+        return {
+            "message": f"Загружено {len(df)} сотрудников",
+            "users": created_users
+        }
+    except Exception as e:
+        print("=== ERROR in /upload ===", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+        
 @app.delete("/employees")
 def delete_all_employees(db: Session = Depends(get_db), current_user: User = Depends(require_role(["admin"]))):
     count = db.query(Employee).count()
