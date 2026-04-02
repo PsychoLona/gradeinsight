@@ -346,7 +346,7 @@ def get_employees(
             "position": emp.position,
             "experience": emp.experience,
             "metrics": emp_data,
-            "grade_result": grade_result
+            "grade_result": grade_result,
             "formal_grade": employee.formal_grade,
             "recommendation": recommendation
         })
