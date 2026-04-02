@@ -26,12 +26,12 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 30px;
             padding: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             transition: transform 0.3s;
             position: relative;
         }
@@ -112,69 +112,62 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .metrics-grid {
+        /* Сетка для профиля */
+        .profile-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 25px;
             margin: 30px 0;
         }
 
-        .metric-card {
+        .profile-card {
             background: #f7fafc;
-            padding: 15px;
             border-radius: 20px;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-        }
-
-        .metric-value {
-            font-size: 32px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .metric-label {
-            color: #718096;
-            margin-top: 8px;
-        }
-
-        .chart-container {
-            max-width: 400px;
-            margin: 20px auto;
-        }
-
-        .history-container {
-            margin: 30px 0;
-        }
-
-        .history-container canvas {
-            max-height: 250px;
-        }
-
-        .recommendations, .ipr {
-            background: #f7fafc;
             padding: 20px;
-            border-radius: 20px;
-            margin-top: 30px;
             transition: all 0.2s;
+            border: 1px solid #edf2f7;
         }
 
-        .recommendations:hover, .ipr:hover {
-            background: #edf2f7;
+        .profile-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px -10px rgba(0,0,0,0.1);
+            background: #ffffff;
         }
 
-        .profile-actions {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+        .profile-card h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+        }
+
+        .full-width-card {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 800px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            .full-width-card {
+                grid-column: span 1;
+            }
+        }
+
+        .metrics-edit {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .metrics-edit input {
+            width: 100px;
+            margin: 0 10px;
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
         }
 
         .btn {
@@ -211,14 +204,12 @@
             border: 1px solid #e2e8f0;
             border-radius: 16px;
             padding: 10px;
-            margin-top: 20px;
         }
 
         .actions-list .positive {
             color: #48bb78;
             font-weight: bold;
         }
-
         .actions-list .negative {
             color: #f56565;
             font-weight: bold;
@@ -237,6 +228,28 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        .ipr-step {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .ipr-step .step-done {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .step-due {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 8px;
+        }
+        .recommendations ul, .ipr ul {
+            margin-left: 20px;
+        }
+        .recommendations li, .ipr li {
+            margin: 8px 0;
         }
     </style>
 </head>
@@ -444,13 +457,6 @@
             currentIprSteps = iprSteps;
             saveIprSteps(currentIprSteps);
 
-            const competencies = {
-                'Задачи': normalized.tasks,
-                'Дедлайны': normalized.deadlines,
-                'Качество кода': normalized.code_quality,
-                'Коммуникации': normalized.communication
-            };
-
             const html = `
                 <div class="employee-header">
                     <div>
@@ -460,41 +466,78 @@
                     </div>
                     <div class="grade-badge">${gradeResult.grade} (${gradeResult.total_score})</div>
                 </div>
-                
+
                 <div class="metrics-edit">
                     <h3>📊 Редактирование метрик</h3>
                     <label>Задач выполнено: <input type="number" id="tasksInput" value="${metrics.tasks_completed}"></label>
                     <label>Соблюдение дедлайнов (%): <input type="number" id="deadlinesInput" step="1" min="0" max="100" value="${metrics.deadlines_met}"></label>
                     <button id="updateMetricsBtn" class="btn">Обновить метрики</button>
                 </div>
-                
-                <div class="metrics-grid">
-                    <div class="metric-card"><div class="metric-value">${metrics.tasks_completed}</div><div class="metric-label">Задач выполнено</div></div>
-                    <div class="metric-card"><div class="metric-value">${metrics.deadlines_met}%</div><div class="metric-label">Соблюдение дедлайнов</div></div>
-                    <div class="metric-card"><div class="metric-value">${metrics.code_quality_score}</div><div class="metric-label">Качество кода</div></div>
-                    <div class="metric-card"><div class="metric-value">${metrics.communication_score}</div><div class="metric-label">Коммуникации</div></div>
-                </div>
-                
-                <div class="chart-container"><canvas id="radarChart"></canvas></div>
-                <div class="history-container"><h3>📈 Динамика баллов</h3><canvas id="historyChart" width="400" height="200"></canvas></div>
-                <div class="actions-container"><h3>📝 История изменений</h3><div id="actionsList" class="actions-list"></div></div>
-                <div class="recommendations"><h3>📈 Рекомендации по развитию</h3><ul id="recommendationsList"></ul></div>
-                <div class="ipr"><h3>📋 Индивидуальный план развития (ИПР)</h3><div id="iprList"></div><div style="margin-top:15px;"><button id="resetIprBtn" class="btn">Сбросить прогресс ИПР</button></div></div>
-                <div class="profile-actions">
-                    <h3>📄 Анализ кода</h3><input type="file" id="codeFile" accept=".py,.txt"><button id="uploadCodeBtn" class="btn">Загрузить и проанализировать</button>
-                    <h3>💬 Анализ комментариев</h3><input type="file" id="commentsFile" accept=".txt"><button id="uploadCommentsBtn" class="btn">Загрузить и проанализировать</button>
+
+                <div class="profile-grid">
+                    <div class="profile-card">
+                        <h3>📈 Текущие метрики</h3>
+                        <div class="metric-value" style="font-size:28px;">${metrics.tasks_completed}</div>
+                        <div>Задач выполнено</div>
+                        <div class="metric-value" style="font-size:28px;">${metrics.deadlines_met}%</div>
+                        <div>Соблюдение дедлайнов</div>
+                        <div class="metric-value" style="font-size:28px;">${metrics.code_quality_score}</div>
+                        <div>Качество кода</div>
+                        <div class="metric-value" style="font-size:28px;">${metrics.communication_score}</div>
+                        <div>Коммуникации</div>
+                    </div>
+
+                    <div class="profile-card">
+                        <h3>📊 Лепестковая диаграмма компетенций</h3>
+                        <canvas id="radarChart" width="300" height="300"></canvas>
+                    </div>
+
+                    <div class="profile-card full-width-card">
+                        <h3>📈 Динамика баллов</h3>
+                        <canvas id="historyChart" width="400" height="200"></canvas>
+                    </div>
+
+                    <div class="profile-card">
+                        <h3>📝 История изменений</h3>
+                        <div class="actions-container">
+                            <div id="actionsList" class="actions-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="profile-card">
+                        <h3>📈 Рекомендации по развитию</h3>
+                        <ul id="recommendationsList"></ul>
+                    </div>
+
+                    <div class="profile-card full-width-card">
+                        <h3>📋 Индивидуальный план развития (ИПР)</h3>
+                        <div id="iprList"></div>
+                        <div style="margin-top:15px;">
+                            <button id="resetIprBtn" class="btn">Сбросить прогресс ИПР</button>
+                        </div>
+                    </div>
+
+                    <div class="profile-card full-width-card">
+                        <h3>📄 Анализ кода</h3>
+                        <input type="file" id="codeFile" accept=".py,.txt">
+                        <button id="uploadCodeBtn" class="btn">Загрузить и проанализировать</button>
+                        <h3>💬 Анализ комментариев</h3>
+                        <input type="file" id="commentsFile" accept=".txt">
+                        <button id="uploadCommentsBtn" class="btn">Загрузить и проанализировать</button>
+                    </div>
                 </div>
             `;
             document.getElementById('employeeContent').innerHTML = html;
 
+            // Лепестковая диаграмма
             const radarCtx = document.getElementById('radarChart').getContext('2d');
             new Chart(radarCtx, {
                 type: 'radar',
                 data: {
-                    labels: Object.keys(competencies),
+                    labels: ['Задачи', 'Дедлайны', 'Качество кода', 'Коммуникации'],
                     datasets: [{
                         label: 'Уровень компетенции',
-                        data: Object.values(competencies),
+                        data: [normalized.tasks, normalized.deadlines, normalized.code_quality, normalized.communication],
                         backgroundColor: 'rgba(102,126,234,0.2)',
                         borderColor: '#667eea',
                         borderWidth: 2,
@@ -506,6 +549,7 @@
                 options: { scales: { r: { beginAtZero: true, max: 1, ticks: { stepSize: 0.2 } } } }
             });
 
+            // Рекомендации
             const recommendations = [];
             if (normalized.tasks < 0.5) recommendations.push('Увеличить количество выполняемых задач');
             if (normalized.deadlines < 0.6) recommendations.push('Улучшить соблюдение сроков (использовать тайм-менеджмент)');
