@@ -582,36 +582,37 @@
             }
         }
 
-        function sortEmployees(columnIndex) {
-            if (currentSortColumn === columnIndex) {
-                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSortColumn = columnIndex;
-                currentSortDirection = 'asc';
-            }
-            const sorted = [...currentEmployeesData];
-            sorted.sort((a, b) => {
-                let aVal, bVal;
-                switch (columnIndex) {
-                    case 0: aVal = a.id; bVal = b.id; break;
-                    case 1: aVal = a.name; bVal = b.name; break;
-                    case 2: aVal = a.position; bVal = b.position; break;
-                    case 3: aVal = a.grade_result.grade; bVal = b.grade_result.grade; break;
-                    case 4: aVal = a.grade_result.total_score; bVal = b.grade_result.total_score; break;
-                    case 5: aVal = a.metrics.tasks_completed; bVal = b.metrics.tasks_completed; break;
-                    case 6: aVal = a.metrics.deadlines_met; bVal = b.metrics.deadlines_met; break;
-                    case 7: aVal = a.recommendation || ''; bVal = b.recommendation || ''; break;
-                    default: return 0;
-                }
-                if (typeof aVal === 'number') {
-                    return currentSortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-                } else {
-                    const comparison = String(aVal).localeCompare(String(bVal));
-                    return currentSortDirection === 'asc' ? comparison : -comparison;
-                }
-            });
-            renderEmployeesTable(sorted);
+function sortEmployees(columnIndex) {
+    if (currentSortColumn === columnIndex) {
+        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSortColumn = columnIndex;
+        currentSortDirection = 'asc';
+    }
+    const sorted = [...currentEmployeesData];
+    sorted.sort((a, b) => {
+        let aVal, bVal;
+        switch (columnIndex) {
+            case 0: aVal = a.id; bVal = b.id; break;
+            case 1: aVal = a.name; bVal = b.name; break;
+            case 2: aVal = a.position; bVal = b.position; break;
+            case 3: aVal = a.grade_result.grade; bVal = b.grade_result.grade; break;
+            case 4: aVal = a.formal_grade || ''; bVal = b.formal_grade || ''; break;
+            case 5: aVal = a.grade_result.total_score; bVal = b.grade_result.total_score; break;
+            case 6: aVal = a.metrics.tasks_completed; bVal = b.metrics.tasks_completed; break;
+            case 7: aVal = a.metrics.deadlines_met; bVal = b.metrics.deadlines_met; break;
+            case 8: aVal = a.recommendation || ''; bVal = b.recommendation || ''; break;
+            default: return 0;
         }
+        if (typeof aVal === 'number') {
+            return currentSortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+        } else {
+            const comparison = String(aVal).localeCompare(String(bVal));
+            return currentSortDirection === 'asc' ? comparison : -comparison;
+        }
+    });
+    renderEmployeesTable(sorted);
+}
 
 function renderEmployeesTable(employees) {
     if (employees.length === 0) {
@@ -620,7 +621,7 @@ function renderEmployeesTable(employees) {
     }
 
     let html = '<div class="employees-table-wrapper"><table id="employeesTable"><thead><tr>';
-    const headers = ['ID', 'Имя', 'Должность', 'Грейд', 'Балл', 'Задачи', 'Дедлайны', 'Рекомендация', 'Действия'];
+    const headers = ['ID', 'Имя', 'Должность', 'Грейд (реальный)', 'Формальный грейд', 'Балл', 'Задачи', 'Дедлайны', 'Рекомендация', 'Действия'];
     headers.forEach((header, idx) => {
         let sortIndicator = '';
         if (currentSortColumn === idx) {
@@ -639,7 +640,6 @@ function renderEmployeesTable(employees) {
         else if (recommendation === 'Понизить') recClass = 'down';
         else recClass = 'keep';
 
-        // Экранируем имя для передачи в функцию
         const escapedName = emp.name.replace(/'/g, "\\'");
 
         html += '<tr>';
@@ -647,6 +647,7 @@ function renderEmployeesTable(employees) {
         html += '<td>' + emp.name + '</td>';
         html += '<td>' + emp.position + '</td>';
         html += '<td class="' + gradeClass + '">' + grade + '</td>';
+        html += '<td>' + (emp.formal_grade || '—') + '</td>';   // Формальный грейд
         html += '<td>' + emp.grade_result.total_score + '</td>';
         html += '<td>' + emp.metrics.tasks_completed + '</td>';
         html += '<td>' + emp.metrics.deadlines_met + '%</td>';
