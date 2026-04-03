@@ -483,12 +483,13 @@ async def upload_employees(
         created_users = []
 
         for _, row in df.iterrows():
+            formal_grade = row.get('formal_grade', '')
             emp = Employee(
                 name=row['name'],
                 position=row['position'],
                 department=row.get('department', ''),
                 experience=int(row.get('experience', 0)),
-                formal_grade = row.get('formal_grade', '')
+                formal_grade=formal_grade,
                 photo_url=row.get('photo_url', '')
             )
             db.add(emp)
