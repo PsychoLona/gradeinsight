@@ -338,7 +338,7 @@ def get_employees(
         }
         weights = get_competency_weights_from_db(emp.position, db)
         grade_result = calculate_grade(emp_data, weights, grade_levels)
-        recommendation = get_recommendation(grade_result["grade"], employee.formal_grade)
+        recommendation = get_recommendation(grade_result["grade"], emp.formal_grade)
 
         result.append({
             "id": emp.id,
