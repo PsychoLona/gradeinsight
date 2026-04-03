@@ -488,6 +488,7 @@ async def upload_employees(
                 position=row['position'],
                 department=row.get('department', ''),
                 experience=int(row.get('experience', 0)),
+                formal_grade = row.get('formal_grade', '')
                 photo_url=row.get('photo_url', '')
             )
             db.add(emp)
